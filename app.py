@@ -9,7 +9,9 @@ st.set_page_config(page_title="Data Scraper", layout="wide")
 
 st.sidebar.title("🔴 Data Scraper")
 option = st.sidebar.radio(
-    "Selecciona una de las opciones", ["About", "Libros", "Detallado"]
+    "Selecciona una de las opciones",
+    ["About", "Libros", "Detallado"],
+    initial_sidebar_state="expanded",
 )
 
 # Inicializar estado
