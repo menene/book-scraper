@@ -49,7 +49,7 @@ if option == "About":
     )
 
     st.image(
-        "https://raw.githubusercontent.com/menene/book-scraper/main/assets/purely_academic.gif"
+        "https://raw.githubusercontent.com/menene/book-scraper/refs/heads/main/assets/purely_academic.gif"
     )
 
 
