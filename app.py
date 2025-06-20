@@ -48,7 +48,10 @@ if option == "About":
     """
     )
 
-    st.image("https://i.makeagif.com/media/2-11-2024/05Cg1m.gif")
+    st.image(
+        "https://raw.githubusercontent.com/menene/book-scraper/main/assets/purely_academic.gif"
+    )
+
 
 elif option == "Libros":
     st.title("Obtener todos los libros")
