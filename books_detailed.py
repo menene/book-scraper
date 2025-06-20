@@ -1,56 +1,67 @@
 # books_detailed.py
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+import requests
 from bs4 import BeautifulSoup
-import time
 
 BASE_URL = "http://books.toscrape.com/"
+CATALOGUE_URL = BASE_URL + "catalogue/"
 
 
 def scrape_book_details(log_callback=None):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    driver = webdriver.Chrome(options=options)
+    detailed_books = []
 
-    driver.get(BASE_URL)
-    time.sleep(1)
+    # Get the first page of books
+    if log_callback:
+        log_callback("Scraping: " + BASE_URL)
 
-    book_links = driver.find_elements(By.CSS_SELECTOR, "article.product_pod h3 a")
-    book_urls = [link.get_attribute("href") for link in book_links]
-
-    book_data = []
-
-    for url in book_urls:
-        driver.get(url)
-        time.sleep(1)
-
+    res = requests.get(BASE_URL)
+    if res.status_code != 200:
         if log_callback:
-            log_callback(f"Scraping book: {url}")
+            log_callback("❌ Error al acceder a la página principal")
+        return []
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        title = soup.h1.text.strip()
-        product_table = soup.select_one("table.table.table-striped")
-        product_info = {
-            row.th.text.strip(): row.td.text.strip()
-            for row in product_table.find_all("tr")
-        }
-        description_tag = soup.select_one("#product_description ~ p")
-        description = description_tag.text.strip() if description_tag else "N/A"
-        category = soup.select("ul.breadcrumb li a")[-1].text.strip()
-        image_rel_url = soup.select_one("div.item.active img")["src"]
-        image_url = BASE_URL + image_rel_url.replace("../", "")
+    soup = BeautifulSoup(res.text, "html.parser")
+    books = soup.select("article.product_pod h3 a")
 
-        book_data.append(
+    for i, book in enumerate(books, start=1):
+        relative_url = book["href"]
+        detail_url = BASE_URL + relative_url.replace("../", "")
+        if log_callback:
+            log_callback(f"Scraping: {detail_url}")
+
+        detail_res = requests.get(detail_url)
+        if detail_res.status_code != 200:
+            if log_callback:
+                log_callback(f"⚠️ Error al acceder al detalle: {detail_url}")
+            continue
+
+        detail_soup = BeautifulSoup(detail_res.text, "html.parser")
+
+        title = detail_soup.find("div", class_="product_main").h1.get_text(strip=True)
+        price = (
+            detail_soup.find("p", class_="price_color")
+            .get_text(strip=True)
+            .replace("Â", "")
+        )
+        availability = detail_soup.find("p", class_="instock availability").get_text(
+            strip=True
+        )
+        rating = detail_soup.find("p", class_="star-rating")["class"][1]
+        description_tag = detail_soup.select_one("#product_description ~ p")
+        description = (
+            description_tag.get_text(strip=True) if description_tag else "No disponible"
+        )
+        image_rel = detail_soup.find("div", class_="item active").img["src"]
+        image_url = BASE_URL + image_rel.replace("../", "")
+
+        detailed_books.append(
             {
                 "Title": title,
-                "UPC": product_info.get("UPC"),
-                "Price (excl. tax)": product_info.get("Price (excl. tax)"),
-                "Availability": product_info.get("Availability"),
-                "Category": category,
+                "Price": price,
+                "Availability": availability,
+                "Rating": rating,
                 "Description": description,
                 "Image": image_url,
             }
         )
 
-    driver.quit()
-    return book_data
+    return detailed_books
