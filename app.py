@@ -6,12 +6,12 @@ from books import scrape_all_books
 from books_detailed import scrape_book_details
 
 st.set_page_config(
-    page_title="Data Scraper", layout="wide", initial_sidebar_state="expanded"
+    page_title="🔴 Web Scraper", layout="wide", initial_sidebar_state="expanded"
 )
 
-st.sidebar.title("🔴 Data Scraper")
+st.sidebar.title("🔴 Web Scraper")
 option = st.sidebar.radio(
-    "Selecciona una de las opciones",
+    "Selecciona una opción",
     ["About", "Libros", "Detallado"],
 )
 
@@ -54,7 +54,7 @@ if option == "About":
 
 
 elif option == "Libros":
-    st.title("Obtener todos los libros")
+    st.title("📚 Obtener todos los libros")
 
     col1, col2 = st.columns(2)
 
@@ -120,7 +120,7 @@ elif option == "Libros":
             )
 
 elif option == "Detallado":
-    st.title("Obtener detalle de libros")
+    st.title("🔮 Obtener detalle de libros")
 
     # Inicializar log y DataFrame
     if "log_messages_details" not in st.session_state:
